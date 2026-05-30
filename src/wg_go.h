@@ -17,6 +17,7 @@ extern void wgTurnOff(int handle);
 extern int64_t wgSetConfig(int handle, const char *settings);
 extern char *wgGetConfig(int handle);
 extern void wgBumpSockets(int handle);
+extern void wgBumpSocketsAndWait(int handle);
 extern void wgDisableSomeRoamingForBrokenMobileSemantics(int handle);
 extern const char *wgVersion();
 
