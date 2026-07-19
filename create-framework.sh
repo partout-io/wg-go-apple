@@ -12,6 +12,7 @@ FRAMEWORKS_PATH="$BUILD_PATH/frameworks"
 FRAMEWORK_PATH="$1"
 FRAMEWORK_NAME="wg_go"
 BUNDLE_IDENTIFIER_NAME="wg-go"
+PUBLIC_HEADER_PATH="$FRAMEWORK_NAME/wg_go.h"
 
 function write_info_plist() {
     local plist_path="$1"
@@ -49,7 +50,7 @@ function write_module_map() {
 
     cat > "$module_map_path" <<EOF
 framework module $FRAMEWORK_NAME {
-    umbrella header "wg_go.h"
+    umbrella header "$PUBLIC_HEADER_PATH"
     export *
 }
 EOF
@@ -62,10 +63,10 @@ function create_flat_framework() {
 
     platform_name="$(basename "$platform_path")"
 
-    mkdir -p "$framework_path/Headers"
+    mkdir -p "$framework_path/Headers/$FRAMEWORK_NAME"
     mkdir -p "$framework_path/Modules"
     cp "$platform_path/libwg-go.a" "$framework_path/$FRAMEWORK_NAME"
-    cp "$platform_path/Headers/wg_go.h" "$framework_path/Headers"
+    cp "$platform_path/Headers/$PUBLIC_HEADER_PATH" "$framework_path/Headers/$FRAMEWORK_NAME"
     write_module_map "$framework_path/Modules/module.modulemap"
     write_info_plist "$framework_path/Info.plist" "$platform_name"
 }
@@ -79,10 +80,10 @@ function create_macos_framework() {
     platform_name="$(basename "$platform_path")"
     version_path="$framework_path/Versions/A"
 
-    mkdir -p "$version_path/Headers"
+    mkdir -p "$version_path/Headers/$FRAMEWORK_NAME"
     mkdir -p "$version_path/Modules"
     cp "$platform_path/libwg-go.a" "$version_path/$FRAMEWORK_NAME"
-    cp "$platform_path/Headers/wg_go.h" "$version_path/Headers"
+    cp "$platform_path/Headers/$PUBLIC_HEADER_PATH" "$version_path/Headers/$FRAMEWORK_NAME"
     write_module_map "$version_path/Modules/module.modulemap"
     write_info_plist "$version_path/Resources/Info.plist" "$platform_name"
 

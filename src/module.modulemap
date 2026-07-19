@@ -1,5 +1,5 @@
 module wg_go {
-    umbrella header "wg_go.h"
+    umbrella header "wg_go/wg_go.h"
     link "wg-go"
     export *
 }
