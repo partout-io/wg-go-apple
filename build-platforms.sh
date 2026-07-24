@@ -8,13 +8,15 @@ function make_wg_go() {
     local platform_name="$1"
     local targets="$2"
     local outdir="$BUILD_PATH/$platform_name"
+    local headersdir="$outdir/Headers/wg_go"
 
     mkdir -p "$outdir"
-    mkdir -p "$outdir/Headers"
+    rm -rf "$outdir/Headers"
+    mkdir -p "$headersdir"
     make -C "$WG_GO_PATH" PLATFORM_NAME="$platform_name" TARGETS="$targets"
     cp "$WG_GO_PATH/out/libwg-go.a" "$outdir"
-    cp "$WG_GO_PATH/wg_go.h" "$outdir/Headers"
-    cp "$WG_GO_PATH/module.modulemap" "$outdir/Headers"
+    cp "$WG_GO_PATH/wg_go.h" "$headersdir"
+    cp "$WG_GO_PATH/module.modulemap" "$headersdir"
     make -C "$WG_GO_PATH" clean
 }
 
