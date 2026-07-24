@@ -16,6 +16,24 @@ BUNDLE_IDENTIFIER_NAME="wg-go"
 function write_info_plist() {
     local plist_path="$1"
     local platform_name="$2"
+    local binary_path="$3"
+    local minimum_os_version
+    local minimum_os_version_key
+
+    minimum_os_version="$(
+        otool -l "$binary_path" |
+            awk '$1 == "minos" && minimum == "" { minimum = $2 } END { print minimum }'
+    )"
+    if [[ -z "$minimum_os_version" ]]; then
+        echo "Unable to determine the minimum OS version from $binary_path"
+        exit 1
+    fi
+
+    if [[ "$platform_name" == "macosx" ]]; then
+        minimum_os_version_key="LSMinimumSystemVersion"
+    else
+        minimum_os_version_key="MinimumOSVersion"
+    fi
 
     mkdir -p "$(dirname "$plist_path")"
     cat > "$plist_path" <<EOF
@@ -31,6 +49,8 @@ function write_info_plist() {
     <string>io.partout.$BUNDLE_IDENTIFIER_NAME.$platform_name</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
+    <key>$minimum_os_version_key</key>
+    <string>$minimum_os_version</string>
     <key>CFBundleName</key>
     <string>$FRAMEWORK_NAME</string>
     <key>CFBundlePackageType</key>
@@ -67,7 +87,10 @@ function create_flat_framework() {
     cp "$platform_path/libwg-go.a" "$framework_path/$FRAMEWORK_NAME"
     cp "$platform_path/Headers/wg_go.h" "$framework_path/Headers"
     write_module_map "$framework_path/Modules/module.modulemap"
-    write_info_plist "$framework_path/Info.plist" "$platform_name"
+    write_info_plist \
+        "$framework_path/Info.plist" \
+        "$platform_name" \
+        "$framework_path/$FRAMEWORK_NAME"
 }
 
 function create_macos_framework() {
@@ -84,7 +107,10 @@ function create_macos_framework() {
     cp "$platform_path/libwg-go.a" "$version_path/$FRAMEWORK_NAME"
     cp "$platform_path/Headers/wg_go.h" "$version_path/Headers"
     write_module_map "$version_path/Modules/module.modulemap"
-    write_info_plist "$version_path/Resources/Info.plist" "$platform_name"
+    write_info_plist \
+        "$version_path/Resources/Info.plist" \
+        "$platform_name" \
+        "$version_path/$FRAMEWORK_NAME"
 
     ln -s A "$framework_path/Versions/Current"
     ln -s Versions/Current/Headers "$framework_path/Headers"
